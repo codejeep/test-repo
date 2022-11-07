@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+    commands:
+      #  USED FOR SUBMODULES
+      - echo "npm i"
+      - npm i
+  pre_build:
+    commands:
+      - echo "pre_build"
+  build:
+    commands:
+      - echo "build"
+  post_build:
+    commands:
+      - echo "post_build"
