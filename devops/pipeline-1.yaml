@@ -103,7 +103,7 @@ Resources:
             Service: codepipeline.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
+        - arn:aws:iam::aws:policy/AdministratorAccess # TODO: Refine
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -179,7 +179,7 @@ Resources:
           - Sid: AllowPushPull
             Effect: Allow
             Principal:
-              AWS: "*"
+              AWS: "*" # TODO: Refine
             Action:
               - "ecr:GetDownloadUrlForLayer"
               - "ecr:BatchGetImage"
