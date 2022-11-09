@@ -29,11 +29,6 @@ Parameters:
     Default: test-project
     AllowedPattern: "[A-Za-z0-9-]+"
 
-  DeployIAMUserName:
-    Type: String
-    Default: jeff-axpara
-    AllowedPattern: "[a-zA-Z0-9-_]+"
-
 Resources:
   PipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -184,16 +179,7 @@ Resources:
           - Sid: AllowPushPull
             Effect: Allow
             Principal:
-              AWS:
-                !Join [
-                  "",
-                  [
-                    "arn:aws:iam::",
-                    !Ref AWS::AccountId,
-                    ":user/",
-                    !Ref DeployIAMUserName,
-                  ],
-                ]
+              AWS: "*"
             Action:
               - "ecr:GetDownloadUrlForLayer"
               - "ecr:BatchGetImage"
