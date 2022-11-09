@@ -29,6 +29,11 @@ Parameters:
     Default: test-project
     AllowedPattern: "[A-Za-z0-9-]+"
 
+  DeployIAMUserName:
+    Type: String
+    Default: jeff-axpara
+    AllowedPattern: "[a-zA-Z0-9-_]+"
+
 Resources:
   PipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -121,7 +126,7 @@ Resources:
   CodeBuildPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Join [ "-", [ CodeBuildPolicy, !Ref ProjectName] ]
+      PolicyName: !Join ["-", [CodeBuildPolicy, !Ref ProjectName]]
       Roles:
         - !Ref CodeBuildRole
       PolicyDocument:
@@ -141,6 +146,10 @@ Resources:
             Resource:
               - !Sub "arn:aws:s3:::codepipeline-ap-southeast-1-*/*"
               - !Sub "arn:aws:s3:::${PipelineArtifactsBucket}/*"
+          - Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+            Resource: "*"
 
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -153,9 +162,43 @@ Resources:
         Type: linuxContainer
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:4.0
+        PrivilegedMode: true
         EnvironmentVariables:
           - Name: BUILD_ARTIFACT_BUCKET
             Value: !Ref PipelineArtifactsBucket
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref ProjectName
       Source:
         Type: CODEPIPELINE
       TimeoutInMinutes: 10
+
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref ProjectName
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowPushPull
+            Effect: Allow
+            Principal:
+              AWS:
+                !Join [
+                  "",
+                  [
+                    "arn:aws:iam::",
+                    !Ref AWS::AccountId,
+                    ":user/",
+                    !Ref DeployIAMUserName,
+                  ],
+                ]
+            Action:
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
