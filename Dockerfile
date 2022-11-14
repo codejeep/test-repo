@@ -1,4 +1,5 @@
-FROM node:12
-WORKDIR /installs
-COPY package* ./
-RUN npm install
+FROM nginx
+
+WORKDIR /usr/share/nginx/html
+COPY index.html .
+EXPOSE 8080
